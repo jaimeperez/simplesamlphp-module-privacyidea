@@ -57,12 +57,12 @@ if (array_key_exists('transaction_id', $_REQUEST)) {
 $signatureData = '';
 if (array_key_exists('signatureData', $_REQUEST)){
 	$signatureData = $_REQUEST['signatureData'];
-	SimpleSAML_Logger::debug("signaturedata: " . $signatureData);
+	SimpleSAML\Logger::debug("signaturedata: " . $signatureData);
 }
 $clientData = '';
 if (array_key_exists('clientData', $_REQUEST)) {
 	$clientData = $_REQUEST['clientData'];
-	SimpleSAML_Logger::debug("clientdata: " . $clientData);
+	SimpleSAML\Logger::debug("clientdata: " . $clientData);
 }
 
 $errorCode = NULL;
@@ -94,26 +94,26 @@ if (!empty($_REQUEST['username']) || !empty($password)) {
 
 	try {
 		// Here we catch the challenge response
-		SimpleSAML_Logger::debug("Calling handleLogin for " . $username);
-		SimpleSAML_Logger::debug("with transaction_id " . $transaction_id);
-		SimpleSAML_Logger::debug("with signatureData " . $signatureData);
-		SimpleSAML_Logger::debug("with clientData " . $clientData);
+		SimpleSAML\Logger::debug("Calling handleLogin for " . $username);
+		SimpleSAML\Logger::debug("with transaction_id " . $transaction_id);
+		SimpleSAML\Logger::debug("with signatureData " . $signatureData);
+		SimpleSAML\Logger::debug("with clientData " . $clientData);
 		sspmod_privacyidea_Auth_Source_privacyidea::handleLogin($authStateId, $username, $password,
 								$transaction_id, $signatureData, $clientData);
 	} catch (SimpleSAML_Error_Error $e) {
 		/* Login failed. Extract error code and parameters, to display the error. */
 		$errorCode = $e->getErrorCode();
 		$errorParams = $e->getParameters();
-		SimpleSAML_Logger::debug("Login failed. Catching errorCode: ". $errorCode);
+		SimpleSAML\Logger::debug("Login failed. Catching errorCode: ". $errorCode);
 		if ($errorCode === "CHALLENGERESPONSE" ) {
 			/* In case of challenge response we do not change the username */
 			$state['forcedUsername'] = $username;
 			$transaction_id = $errorParams[1];
 			$message = $errorParams[2];
 			$attributes = $errorParams[3];
-			SimpleSAML_Logger::debug("Challenge Response transaction_id: ". $errorParams[1]);
-			SimpleSAML_Logger::debug("Challenge Response message: ". $errorParams[2]);
-			SimpleSAML_Logger::debug("CHallenge Response attributes: ". print_r($attributes, TRUE));
+			SimpleSAML\Logger::debug("Challenge Response transaction_id: ". $errorParams[1]);
+			SimpleSAML\Logger::debug("Challenge Response message: ". $errorParams[2]);
+			SimpleSAML\Logger::debug("CHallenge Response attributes: ". print_r($attributes, TRUE));
 		}
 	}
 }

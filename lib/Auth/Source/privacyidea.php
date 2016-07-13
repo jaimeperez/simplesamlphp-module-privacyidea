@@ -111,21 +111,21 @@ class sspmod_privacyidea_Auth_Source_privacyidea extends sspmod_core_Auth_UserPa
 		$params = "user=".$escUsername."&pass=".$escPassword."&realm=".urlencode($this->realm);
 
 		if ($transaction_id) {
-			SimpleSAML_Logger::debug("Authenticating with transaction_id: ". $transaction_id);
+			SimpleSAML\Logger::debug("Authenticating with transaction_id: ". $transaction_id);
 			$params = $params . "&transaction_id=".urlencode($transaction_id);
 		}
 		if ($signaturedata) {
-			SimpleSAML_Logger::debug("Authenticating with signaturedata: ". $signaturedata);
+			SimpleSAML\Logger::debug("Authenticating with signaturedata: ". $signaturedata);
 			$params = $params . "&signaturedata=".urlencode($signaturedata);
 		}
 		if ($clientdata) {
-			SimpleSAML_Logger::debug("Authenticating with clientdata: ". $clientdata);
+			SimpleSAML\Logger::debug("Authenticating with clientdata: ". $clientdata);
 			$params = $params . "&clientdata=".urlencode($clientdata);
 		}
 		
 		//throw new Exception("url: ". $url);
-		SimpleSAML_Logger::debug("privacyidea URL:" . $url);
-		SimpleSAML_Logger::debug("Params: " . $params);
+		SimpleSAML\Logger::debug("privacyidea URL:" . $url);
+		SimpleSAML\Logger::debug("Params: " . $params);
 	
 		curl_setopt($curl_instance, CURLOPT_URL, $url);
 		curl_setopt($curl_instance, CURLOPT_HEADER, TRUE);
@@ -158,7 +158,7 @@ class sspmod_privacyidea_Auth_Source_privacyidea extends sspmod_core_Auth_UserPa
     
 		try {
 			$result = $body->result;
-			SimpleSAML_Logger::debug("privacyidea result:" . print_r($result, True));
+			SimpleSAML\Logger::debug("privacyidea result:" . print_r($result, True));
 			$status = $result->status;
 			$value = $result->value->auth;
 		} catch (Exception $e) {
@@ -171,7 +171,7 @@ class sspmod_privacyidea_Auth_Source_privacyidea extends sspmod_core_Auth_UserPa
 		} else {
 			/* The STATUS is true, so we need to check the value */
 			if ($value !== True) {
-				SimpleSAML_Logger::debug("Throwing WRONGUSERPASS");
+				SimpleSAML\Logger::debug("Throwing WRONGUSERPASS");
 				$detail = $body->detail;
 				$message = $detail->message;
 				if (property_exists($detail, "transaction_id")) {
@@ -180,8 +180,8 @@ class sspmod_privacyidea_Auth_Source_privacyidea extends sspmod_core_Auth_UserPa
 				if (property_exists($detail, "attributes")) {
 					$attributes = $detail->attributes;
 					if (property_exists($attributes, "u2fSignRequest")) {
-						SimpleSAML_Logger::debug("This is an U2F authentication request");
-						SimpleSAML_Logger::debug(print_r($attributes, TRUE));
+						SimpleSAML\Logger::debug("This is an U2F authentication request");
+						SimpleSAML\Logger::debug(print_r($attributes, TRUE));
 						/*
 						 * In case of U2F the $attributes looks like this:
 						[img] => static/css/FIDO-U2F-Security-Key-444x444.png#012
@@ -195,10 +195,10 @@ class sspmod_privacyidea_Auth_Source_privacyidea extends sspmod_core_Auth_UserPa
 				}
 				if ( $transaction_id ) {
 					/* If we have a transaction_id, we do challenge response */
-					SimpleSAML_Logger::debug("Throwing CHALLENGERESPONSE");
+					SimpleSAML\Logger::debug("Throwing CHALLENGERESPONSE");
 					throw new SimpleSAML_Error_Error(["CHALLENGERESPONSE", $transaction_id, $message, $attributes]);
 				}
-				SimpleSAML_Logger::debug("Throwing WRONGUSERPASS");
+				SimpleSAML\Logger::debug("Throwing WRONGUSERPASS");
 				throw new SimpleSAML_Error_Error("WRONGUSERPASS");
 			}
 		}
@@ -208,7 +208,7 @@ class sspmod_privacyidea_Auth_Source_privacyidea extends sspmod_core_Auth_UserPa
 			// We have the old response, where the attributes are located directly in the value
 			$user_attributes = $result->value;
 		}
-		SimpleSAML_Logger::debug("privacyidea returned user attributes: " . print_r($user_attributes, True));
+		SimpleSAML\Logger::debug("privacyidea returned user attributes: " . print_r($user_attributes, True));
 		/* status and value are true
 		 * We can go on and fill attributes
 		 */
@@ -218,28 +218,28 @@ class sspmod_privacyidea_Auth_Source_privacyidea extends sspmod_core_Auth_UserPa
 		$arr = array( "username", "surname", "email", "givenname", "mobile", "phone", "realm", "resolver");
 		reset($arr);
 		foreach ( $arr as $key) {
-			SimpleSAML_Logger::debug("privacyidea        key: " . $key);
+			SimpleSAML\Logger::debug("privacyidea        key: " . $key);
 			if (array_key_exists($key, $this->attributemap)) {
 				// We have a key mapping
 				$mapped_key = $this->attributemap[$key];
-				SimpleSAML_Logger::debug("privacyidea mapped key: " . $mapped_key);
+				SimpleSAML\Logger::debug("privacyidea mapped key: " . $mapped_key);
 				$attribute_value = $user_attributes->$key;
-				SimpleSAML_Logger::debug("privacyidea    value  : " . $attribute_value);
+				SimpleSAML\Logger::debug("privacyidea    value  : " . $attribute_value);
 				if ($attribute_value) {
-					SimpleSAML_Logger::debug("privacyidea Mapped key in response");	
+					SimpleSAML\Logger::debug("privacyidea Mapped key in response");	
 					$attributes[$mapped_key] = array($attribute_value);
-					SimpleSAML_Logger::debug("privacyidea      value: " . print_r($attributes[$mapped_key]));
+					SimpleSAML\Logger::debug("privacyidea      value: " . print_r($attributes[$mapped_key]));
 				} 
 			} else {
 				// We have no keymapping and just transfer the attribute
-				SimpleSAML_Logger::debug("privacyidea unmapped key: ". $key);
+				SimpleSAML\Logger::debug("privacyidea unmapped key: ". $key);
 				if ($user_attributes->$key) {
 					$attributes[$key] = array($user_attributes->$key);
-					SimpleSAML_Logger::debug("privacyidea        value: ". print_r($attributes[$key]));
+					SimpleSAML\Logger::debug("privacyidea        value: ". print_r($attributes[$key]));
 				}
 			}	
 		}
-		SimpleSAML_Logger::debug("privacyidea Array returned: " . print_r($attributes, True));
+		SimpleSAML\Logger::debug("privacyidea Array returned: " . print_r($attributes, True));
 		return $attributes;
 	}
 
@@ -257,11 +257,11 @@ class sspmod_privacyidea_Auth_Source_privacyidea extends sspmod_core_Auth_UserPa
 
                 /* We are going to need the authId in order to retrieve this authentication source later. */
                 $state[self::AUTHID] = $this->authId;
-		SimpleSAML_Logger::debug("privacyIDEA authId: ". $this->authId);
+		SimpleSAML\Logger::debug("privacyIDEA authId: ". $this->authId);
 
                 $id = SimpleSAML_Auth_State::saveState($state, self::STAGEID);
 
-                $url = SimpleSAML_Module::getModuleURL('privacyidea/loginform.php');
+                $url = SimpleSAML\Module::getModuleURL('privacyidea/loginform.php');
                 SimpleSAML_Utilities::redirectTrustedURL($url, array('AuthState' => $id));
         }
 
@@ -282,7 +282,7 @@ class sspmod_privacyidea_Auth_Source_privacyidea extends sspmod_core_Auth_UserPa
                 assert('is_string($password)');
 		assert('is_string($transaction_id)');
 
-		SimpleSAML_Logger::debug("calling privacyIDEA handleLogin with authState: ". $authStateId . " for user ". $username);
+		SimpleSAML\Logger::debug("calling privacyIDEA handleLogin with authState: ". $authStateId . " for user ". $username);
 
                 // sanitize the input
                 $sid = SimpleSAML_Utilities::parseStateID($authStateId);
@@ -309,11 +309,11 @@ class sspmod_privacyidea_Auth_Source_privacyidea extends sspmod_core_Auth_UserPa
                 try {
                         $attributes = $source->login_chal_resp($username, $password, $transaction_id, $signaturedata, $clientdata);
                 } catch (Exception $e) {
-                        SimpleSAML_Logger::stats('Unsuccessful login attempt from '.$_SERVER['REMOTE_ADDR'].'.');
+                        SimpleSAML\Logger::stats('Unsuccessful login attempt from '.$_SERVER['REMOTE_ADDR'].'.');
                         throw $e;
                 }
 
-                SimpleSAML_Logger::stats('User \''.$username.'\' has been successfully authenticated.');
+                SimpleSAML\Logger::stats('User \''.$username.'\' has been successfully authenticated.');
 
                 /* Save the attributes we received from the login-function in the $state-array. */
                 assert('is_array($attributes)');

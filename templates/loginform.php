@@ -8,19 +8,19 @@ $password_text = $this->t('{privacyidea:privacyidea:password_otp}');
 
 if ($this->data['errorcode'] === "CHALLENGERESPONSE") {
         $password_text = $this->t('{privacyidea:privacyidea:otp}');
-        SimpleSAML_Logger::debug("Attributes: ". print_r($this->data["chal_resp_attributes"], TRUE));
+        SimpleSAML\Logger::debug("Attributes: ". print_r($this->data["chal_resp_attributes"], TRUE));
         $chal_resp_attributes = $this->data['chal_resp_attributes'];
         $hideResponseInput = $chal_resp_attributes->hideResponseInput;
         $chal_resp_message = $this->data['chal_resp_message'];
         // check if this is U2F
         $u2fSignRequest = $chal_resp_attributes->u2fSignRequest;
-        SimpleSAML_Logger::debug("u2fSignRequest: ". print_r($u2fSignRequest, TRUE));
+        SimpleSAML\Logger::debug("u2fSignRequest: ". print_r($u2fSignRequest, TRUE));
 }
 
 if ($u2fSignRequest) {
 	// Add javascript for U2F support before including the header.
-	$this->data['head'] = '<script type="text/javascript" src="'.SimpleSAML_Module::getModuleUrl('privacyidea/js/u2f-api.js').'"></script>\n';
-	$this->data['head'] .= '<script type="text/javascript" src="'.SimpleSAML_Module::getModuleUrl('privacyidea/js/u2f.js').'"></script>';
+	$this->data['head'] = '<script type="text/javascript" src="'.SimpleSAML\Module::getModuleUrl('privacyidea/js/u2f-api.js').'"></script>\n';
+	$this->data['head'] .= '<script type="text/javascript" src="'.SimpleSAML\Module::getModuleUrl('privacyidea/js/u2f.js').'"></script>';
 }
 
 $this->data['header'] = $this->t('{privacyidea:privacyidea:header}');
@@ -135,7 +135,7 @@ In case of challenge response with the U2F, we hide the password.
 // Move submit button to next row if remember checkbox enabled
 if ($this->data['rememberUsernameEnabled'] || $this->data['rememberMeEnabled']) {
 	$rowspan = (array_key_exists('organizations', $this->data) ? 2 : 1);
-	SimpleSAML_Logger::debug("u2fSignRequest: " . print_r($u2fSignRequest, TRUE));
+	SimpleSAML\Logger::debug("u2fSignRequest: " . print_r($u2fSignRequest, TRUE));
 	if ($u2fSignRequest === NULL) {
 		echo '<td style="padding: .4em;" rowspan="' . $rowspan . '">';
 		echo '<input type="submit" tabindex="5" id="regularsubmit" value="'. $this->t('{login:login_button}'). '" />';
@@ -206,7 +206,7 @@ $this->includeAtTemplateBase('includes/footer.php');
 
 if ($u2fSignRequest) {
 	// We call the U2F signing function
-	SimpleSAML_Logger::debug("Calling Javascript with u2fSignRequest: ". print_r($u2fSignRequest, TRUE));
+	SimpleSAML\Logger::debug("Calling Javascript with u2fSignRequest: ". print_r($u2fSignRequest, TRUE));
 	echo '<script type="text/javascript">';
 	echo 'sign_u2f_request(';
 	echo '"'.$u2fSignRequest->challenge.'",';
